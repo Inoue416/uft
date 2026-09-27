@@ -92,6 +92,29 @@ test("uses the site modal instead of a browser prompt for Markdown names", async
   expect(browserDialogOpened).toBe(false);
 });
 
+test("creates folders and Markdown documents at the workspace root", async ({ page }) => {
+  await page.goto("/workspace");
+  await expect(page.locator(".cm-content")).toBeVisible();
+
+  const root = page.getByRole("button", { name: "ワークスペースのルート" });
+  await root.click();
+  await expect(root).toHaveClass(/active/);
+  await page.getByRole("button", { name: "新しいフォルダ" }).click();
+  await submitTextInputDialog(page, "root-folder");
+  await expect(page.locator('[data-entry-path="root-folder"]')).toBeVisible();
+
+  await root.click();
+  await page.getByRole("button", { name: "新しい文書" }).click();
+  await submitTextInputDialog(page, "root-document");
+  await expect(page.locator('[data-entry-path="root-document.md"]')).toBeVisible();
+
+  await page.getByRole("button", { name: "保存", exact: true }).click();
+  await expect(page.locator(".status")).toContainText("保存済み");
+  await page.reload();
+  await expect(page.locator('[data-entry-path="root-folder"]')).toBeVisible();
+  await expect(page.locator('[data-entry-path="root-document.md"]')).toBeVisible();
+});
+
 test("moves files and folders by dragging them onto folders", async ({ page }) => {
   const names = ["Drop target", "nested", "dragged.md"];
 

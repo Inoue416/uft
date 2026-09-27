@@ -453,6 +453,11 @@ function selectEntry(entry: WorkspaceEntry): void {
   }
 }
 
+function selectRoot(): void {
+  activeEntryId = null;
+  sidebarOpen = false;
+}
+
 function canWrite(): boolean {
   return true;
 }
@@ -1137,15 +1142,17 @@ function closeLauncher(): void {
       <div class="mobile-only mobile-sidebar-heading"><strong>文書一覧</strong><button aria-label="文書一覧を閉じる" onclick={() => sidebarOpen = false}><X aria-hidden="true" /></button></div>
       <div class="sidebar-title"><span>{workspace?.name ?? ""}</span><span><button aria-label="新しい文書" onclick={() => create("markdown")} disabled={!workspace}><FilePlus aria-hidden="true" /></button><button aria-label="新しいフォルダ" onclick={() => create("folder")} disabled={!workspace}><FolderPlus aria-hidden="true" /></button></span></div>
       {#if workspace}
-        <div
+        <button
+          type="button"
+          class:active={activeEntryId === null}
           class:drop-target={dropTargetId === null && draggingEntryId !== null}
-          class="root-drop-target"
-          role="group"
-          aria-label="ワークスペースのルートにドロップ"
+          class="tree-item root-tree-item"
+          aria-label="ワークスペースのルート"
+          onclick={selectRoot}
           ondragover={(event) => showDropTarget(event, null)}
           ondragleave={clearDropTarget}
           ondrop={(event) => dropEntry(event, null)}
-        >ワークスペースのルートにドロップ</div>
+        ><span class="tree-icon" aria-hidden="true"><FolderOpen /></span><span>ワークスペースのルート</span></button>
         {#each visibleEntries as { entry, depth } (entry.id)}
           <button
             class:active={entry.id === activeEntryId}
