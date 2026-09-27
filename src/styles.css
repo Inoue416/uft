@@ -332,3 +332,14 @@
     overflow: auto;
   }
 }
+
+/* Keep long Markdown lines inside the preview frame on desktop and mobile. */
+.preview-content {
+  width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.preview-content table {
+  table-layout: fixed;
+}
