@@ -78,7 +78,7 @@
       import("@codemirror/state"), import("@codemirror/view"), import("@codemirror/commands"), import("@codemirror/lang-markdown"),
     ]);
     editable = new Compartment();
-    view = new EditorView({ parent: host, state: EditorState.create({ doc: value, extensions: [lineNumbers(), history(), markdown(), keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]), editable.of(EditorView.editable.of(!readOnly)), EditorView.updateListener.of((update) => { if (update.docChanged && !applyingExternalValue) onChange(update.state.doc.toString()); if (update.docChanged || update.selectionSet) refreshActiveFormats(); })] }) });
+    view = new EditorView({ parent: host, state: EditorState.create({ doc: value, extensions: [lineNumbers(), EditorView.lineWrapping, history(), markdown(), keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]), editable.of(EditorView.editable.of(!readOnly)), EditorView.updateListener.of((update) => { if (update.docChanged && !applyingExternalValue) onChange(update.state.doc.toString()); if (update.docChanged || update.selectionSet) refreshActiveFormats(); })] }) });
     reconfigureEditable = (nextReadOnly) => {
       if (view && editable)
         view.dispatch({
