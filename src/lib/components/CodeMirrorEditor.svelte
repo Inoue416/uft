@@ -74,11 +74,19 @@
   });
 
   async function setup(): Promise<void> {
-    const [{ EditorState, Compartment }, { EditorView, keymap, lineNumbers }, { defaultKeymap, history, historyKeymap, indentWithTab }, { markdown }] = await Promise.all([
+    const [{ EditorState, Compartment }, { EditorView, keymap, lineNumbers }, { defaultKeymap, history, historyKeymap, indentWithTab, selectAll }, { markdown }] = await Promise.all([
       import("@codemirror/state"), import("@codemirror/view"), import("@codemirror/commands"), import("@codemirror/lang-markdown"),
     ]);
     editable = new Compartment();
-    view = new EditorView({ parent: host, state: EditorState.create({ doc: value, extensions: [lineNumbers(), EditorView.lineWrapping, history(), markdown(), keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]), editable.of(EditorView.editable.of(!readOnly)), EditorView.updateListener.of((update) => { if (update.docChanged && !applyingExternalValue) onChange(update.state.doc.toString()); if (update.docChanged || update.selectionSet) refreshActiveFormats(); })] }) });
+    view = new EditorView({ parent: host, state: EditorState.create({ doc: value, extensions: [lineNumbers({ domEventHandlers: {
+      mousedown(editor, block, event) {
+        if (!(event instanceof MouseEvent) || event.button !== 0) return false;
+        const line = editor.state.doc.lineAt(block.from);
+        editor.dispatch({ selection: { anchor: line.from, head: line.to } });
+        editor.focus();
+        return true;
+      },
+    } }), EditorView.lineWrapping, history(), markdown(), keymap.of([{ key: "Ctrl-a", run: selectAll }, { key: "Mod-a", run: selectAll }, ...defaultKeymap, ...historyKeymap, indentWithTab]), editable.of(EditorView.editable.of(!readOnly)), EditorView.updateListener.of((update) => { if (update.docChanged && !applyingExternalValue) onChange(update.state.doc.toString()); if (update.docChanged || update.selectionSet) refreshActiveFormats(); })] }) });
     reconfigureEditable = (nextReadOnly) => {
       if (view && editable)
         view.dispatch({

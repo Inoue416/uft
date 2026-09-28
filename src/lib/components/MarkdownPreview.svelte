@@ -7,6 +7,7 @@
   import type { MarkdownFormat } from "../markdown/formatting";
   let { markdown = "", assetUrls = {}, documentPath = "docs/overview.md", canEdit = false, onChange = () => undefined }: { markdown?: string; assetUrls?: Record<string, string>; documentPath?: string; canEdit?: boolean; onChange?: (markdown: string) => void } = $props();
   let html = $state(""); let host: HTMLElement; let renderVersion = 0; let editing = $state(false); let lastEmittedMarkdown: string | null = null; let activeFormats = $state(new Set<MarkdownFormat>()); let savedRange: Range | null = null;
+  let pointerStart: { x: number; y: number } | null = null;
   $effect(() => { if (editing && markdown === lastEmittedMarkdown) return; void updateHtml(markdown, assetUrls, documentPath); });
   $effect(() => { if (!canEdit && editing) editing = false; });
   onMount(() => {
@@ -129,6 +130,39 @@
   }
   function handleInput(): void { if (!editing || !host) return; renderVersion += 1; refreshActiveFormats(); const nextMarkdown = previewToMarkdown(host); if (nextMarkdown === lastEmittedMarkdown) return; lastEmittedMarkdown = nextMarkdown; onChange(nextMarkdown); }
   function stopEditing(): void { editing = false; activeFormats = new Set(); savedRange = null; lastEmittedMarkdown = null; }
+  function selectPreviewContents(event: KeyboardEvent): void {
+    if (!(event.ctrlKey || event.metaKey) || event.altKey || event.key.toLowerCase() !== "a") return;
+    event.preventDefault();
+    const selection = window.getSelection();
+    if (!selection) return;
+    const range = document.createRange();
+    range.selectNodeContents(host);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    savedRange = range.cloneRange();
+    if (editing) refreshActiveFormats();
+  }
+  function selectPreviewLine(event: MouseEvent): void {
+    const start = pointerStart;
+    pointerStart = null;
+    if (event.button !== 0 || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+    if (!start || Math.hypot(event.clientX - start.x, event.clientY - start.y) > 4) return;
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const line = target.closest("h1, h2, h3, h4, h5, h6, p, li, blockquote, pre, td, th");
+    if (!line || !host.contains(line)) return;
+    window.setTimeout(() => {
+      if (!host.contains(line)) return;
+      const selection = window.getSelection();
+      if (!selection) return;
+      const range = document.createRange();
+      range.selectNodeContents(line);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      savedRange = range.cloneRange();
+      if (editing) refreshActiveFormats();
+    }, 0);
+  }
 </script>
 <div class="markdown-preview">
   <div class="preview-editor-bar">
@@ -136,5 +170,5 @@
     {#if editing}<span class="preview-editing-note">Markdown に自動反映</span>{/if}
     {#if canEdit}<button type="button" class="preview-edit-toggle" class:active={editing} aria-pressed={editing} onclick={() => editing ? stopEditing() : editing = true}>{editing ? "編集を終了" : "プレビューを編集"}</button>{/if}
   </div>
-  <article class:editing class="preview-content" bind:this={host} contenteditable={editing} aria-label={editing ? "編集可能な Markdown プレビュー" : "Markdown プレビュー"} spellcheck={editing} oninput={handleInput}>{@html html}</article>
+  <div class:editing class="preview-content" bind:this={host} contenteditable={editing} role="textbox" aria-multiline="true" aria-readonly={!editing} tabindex="0" aria-label={editing ? "編集可能な Markdown プレビュー" : "Markdown プレビュー"} spellcheck={editing} oninput={handleInput} onkeydown={selectPreviewContents} onpointerdown={(event) => pointerStart = { x: event.clientX, y: event.clientY }} onclick={selectPreviewLine}>{@html html}</div>
 </div>
