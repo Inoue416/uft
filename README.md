@@ -4,6 +4,8 @@ Markdown、画像、図表をブラウザ内だけで作成・編集し、Markdo
 
 設計判断の詳細は [技術スタック決定](docs/_plans/technology-stack.md) と [ADR 0001](docs/adr/0001-local-first-editor-stack.md) を参照してください。
 
+WebMCP の公開状況と API は [WebMCP 調査資料](docs/webmcp.md)、Markdown エディタへの導入案は [WebMCP 導入計画](docs/_plans/webmcp-markdown-editor.md) を参照してください。現時点では計画段階です。
+
 ## Run locally
 
 ```bash
