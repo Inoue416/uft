@@ -1,6 +1,6 @@
 # Markdown エディタへの WebMCP 導入計画
 
-作成日: 2026-10-02。状態: 提案。本 PR は調査資料と計画書を追加するもので、以下の機能はまだ実装しない。
+作成日: 2026-10-02。状態: 5 ツールの実装・ローカル実機検証済み。試験公開と公開 origin の Origin Trial 検証は未実施。[検証記録](../verification/webmcp.md) に証拠と残項目を記載する。
 
 基準コード: `origin/main` の `fca3d5e78e7e60396b1375c7decbe3c78387d244`。WebMCP の公開状況・一次資料は [調査資料](../webmcp.md) を参照する。以下のツール名・制限値・モジュール名は UFT の設計案であり、WebMCP の標準で定められたものではない。
 
@@ -137,7 +137,7 @@ Web Locks を使う場合は既存の `uft-workspace-save` と揃え、ロック
 4. **作成と本文更新**: 2 つの書き込みツール、差分確認、versionToken、requestId、キャンセルを追加する。保存成功を返す時点と画面の本文・Undo を一致させる。
 5. **試験公開**: 利用手順と検証結果を更新する。必要な公開 origin ごとに Origin Trial の条件と期限を再確認し、token を `<meta>` またはレスポンスヘッダーへ追加する。公開ホストと preview ホストの対象を混同せず、期限切れも通常編集へ戻ることを確認する。
 
-WebMCP 対応だけなら CSP の外部通信先追加や Pages Functions は不要である。実装と試験公開は後続 PR で行い、この資料 PR では登録やホスティング設定を変更しない。
+WebMCP 対応だけなら CSP の外部通信先追加や Pages Functions は不要である。5 ツールの実装では既存 CSP を維持した。試験公開は、対象公開 origin とその Origin Trial トークンを確認してから行う。トークンのビルド時設定とフラグなしの公開検証用テストは追加済みで、実サイトの検証結果はまだない。
 
 ## 検証計画
 
@@ -153,7 +153,7 @@ WebMCP 対応だけなら CSP の外部通信先追加や Pages Functions は不
 
 CI では登録 API のモックを用いたテストと UI・IndexedDB の統合試験を行う。モックだけで WebMCP の実対応を証明しない。ネイティブ API の検証は実ブラウザでも行い、ヘッドレスで利用できない場合はその制約を記録する。
 
-実装 PR では `pnpm lint`、`pnpm check`、`pnpm test`、`pnpm build`、`pnpm test:e2e` を実行する。既存の選択範囲、手動編集、複数タブ同期、Markdown／ZIP 出力、変換画面の回帰も確認する。本資料 PR はローカルリンク、差分、既存 CI の必須コマンドを検証し、新しいコードテストは追加しない。
+実装 PR では `pnpm lint`、`pnpm check`、`pnpm test`、`pnpm build`、`pnpm test:e2e` を実行する。既存の選択範囲、手動編集、複数タブ同期、Markdown／ZIP 出力、変換画面の回帰も確認する。実装の検証コマンド、実ブラウザのバージョン、Inspector の結果は検証記録へ記載する。
 
 ## 初期導入の受け入れ条件
 
